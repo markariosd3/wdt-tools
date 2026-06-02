@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Personal notes (not for the remote repo)
+TODO.md
+
+# Secrets and local config (never commit credentials)
+.env
+.env.*
+credentials/
+
+# Tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

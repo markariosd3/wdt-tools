@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wdt-tools"
+dynamic = ["version"]
+description = "WDT Tools — unofficial CLI exports for HomeSource Systems tenants (inventory, models, orders)"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "WDT Tools contributors" },
+]
+keywords = [
+    "wdt-tools",
+    "warehouse-duct-tape",
+    "homesource",
+    "homesource-systems",
+    "export",
+    "inventory",
+    "erp",
+    "selenium",
+    "cli",
+    "csv",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "requests>=2.28.0,<3",
+    "selenium>=4.6.0,<5",
+    "rich>=13.7.0,<14",
+    "rich-argparse>=1.5.0,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0,<9",
+    "ruff>=0.8.0,<1",
+    "build>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/wdt-tools"
+Documentation = "https://github.com/YOUR_USERNAME/wdt-tools#readme"
+Repository = "https://github.com/YOUR_USERNAME/wdt-tools"
+Issues = "https://github.com/YOUR_USERNAME/wdt-tools/issues"
+Changelog = "https://github.com/YOUR_USERNAME/wdt-tools/blob/main/CHANGELOG.md"
+
+[project.scripts]
+fetch-physical-inventory = "fetch_physical_inventory:cli"
+fetch-model = "fetch_model:cli"
+fetch-order-detail = "fetch_order_detail:cli"
+fetch-physical-inventory-with-model = "fetch_physical_inventory_with_model:cli"
+
+[tool.setuptools]
+py-modules = [
+    "homesource_common",
+    "open_homesource",
+    "fetch_physical_inventory",
+    "fetch_model",
+    "fetch_order_detail",
+    "fetch_physical_inventory_with_model",
+]
+
+[tool.setuptools.dynamic]
+version = { file = "VERSION" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+markers = [
+    "integration: tests that need live HomeSource login (skipped in CI)",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+"fetch_*.py" = ["E501"]
+"tests/*" = ["E501"]

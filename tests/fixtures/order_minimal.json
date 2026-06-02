@@ -1,0 +1,17 @@
+{
+  "invoice_items": [
+    {
+      "OrderItemId": 100,
+      "Model": "TEST-MODEL",
+      "Manufacturer": "TestMfr",
+      "Qty": 1,
+      "invoiced_inventory": [
+        {
+          "InventoryId": "INV-1",
+          "MFGSerialNumber": "SN-99",
+          "Cost": 100.5
+        }
+      ]
+    }
+  ]
+}
