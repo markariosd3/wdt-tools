@@ -322,6 +322,23 @@ def emit_curated_rows(
     return emit_tabular_rows(rows, out_path, fmt, columns)
 
 
+def _resolve_chromedriver_service():
+    # Selenium Manager occasionally hangs on its network calls; point Service
+    # at the newest cached chromedriver so launch bypasses Manager entirely.
+    # Returns None on non-Windows or if no cached driver is found, allowing
+    # graceful fallback to Selenium Manager.
+    cache = Path.home() / ".cache" / "selenium" / "chromedriver" / "win64"
+    if cache.exists():
+        versions = sorted(
+            (p for p in cache.iterdir() if p.is_dir() and (p / "chromedriver.exe").exists()),
+            key=lambda p: tuple(int(x) for x in p.name.split(".") if x.isdigit()),
+        )
+        if versions:
+            from selenium.webdriver.chrome.service import Service
+            return Service(executable_path=str(versions[-1] / "chromedriver.exe"))
+    return None
+
+
 def build_authenticated_session(
     creds: dict[str, str],
     base_url: str,
@@ -365,7 +382,8 @@ def build_authenticated_session(
     opts.add_argument(f"user-agent={USER_AGENT}")
 
     sys.stderr.write("Starting Chrome and logging in to HomeSource...\n")
-    driver = webdriver.Chrome(options=opts)
+    _svc = _resolve_chromedriver_service()
+    driver = webdriver.Chrome(service=_svc, options=opts) if _svc else webdriver.Chrome(options=opts)
     cookies: list[dict] = []
     try:
         login(
