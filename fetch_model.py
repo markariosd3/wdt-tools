@@ -125,6 +125,7 @@ REQUIREMENTS
 
 from __future__ import annotations
 
+import datetime
 import json
 import sys
 import time
@@ -156,7 +157,9 @@ PROVENANCE_COLUMNS = ["_source_query", "_error"]
 # remaining names are the model fields requested for the default view.
 DEFAULT_FIELDS = [
     "_source_query",
+    "timestamp_utc",
     "ModelNumber",
+    "ProductId_FK",
     "ReplacementCost",
     "ObsoleteDate",
     "ShortDescription",
@@ -170,7 +173,13 @@ DEFAULT_FIELDS = [
     "Transfer",
     "Sellable",
     "NetAvailable",
+    "BaseModel",
+    "CustomModel",
+    "tags",
+    "spiffs",
     "manufacturer.Name",
+    "manufacturer.Obsolete",
+    "type.Name",
     "category.Name",
 ]
 
@@ -626,6 +635,11 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.delay and idx < total:
             time.sleep(args.delay)
+
+    # Add timestamp_utc to all rows
+    timestamp_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    for row in all_rows:
+        row["timestamp_utc"] = timestamp_utc
 
     count = emit_rows(
         all_rows, args.output, out_fmt,
