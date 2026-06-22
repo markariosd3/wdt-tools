@@ -30,6 +30,7 @@ fetch-physical-inventory -h
 | Script | Purpose |
 |--------|---------|
 | [`fetch_physical_inventory.py`](fetch_physical_inventory.py) | All scan lines for one or more physical inventory runs |
+| [`fetch_inventory_id.py`](fetch_inventory_id.py) | Serial / inventory records by InventoryId, including timestamp, tags, and pricing fields |
 | [`fetch_model.py`](fetch_model.py) | Model catalog records by model number |
 | [`fetch_order_detail.py`](fetch_order_detail.py) | Invoiced units per sales order (full API data when available) |
 | [`fetch_physical_inventory_with_model.py`](fetch_physical_inventory_with_model.py) | Physical inventory plus manufacturer, category, description, and color |
@@ -52,6 +53,7 @@ pip install wdt-tools
 | Command | Purpose |
 |---------|---------|
 | `fetch-physical-inventory` | Physical inventory runs |
+| `fetch-inventory-id` | Inventory serial / serial-grid exports |
 | `fetch-model` | Model catalog |
 | `fetch-order-detail` | Order / invoiced units |
 | `fetch-physical-inventory-with-model` | Inventory + model metadata |
@@ -124,6 +126,7 @@ Override the tenant URL for a single run with `--base-url` (optional).
 
 ```bash
 fetch-physical-inventory --run-ids 641 -o inventory.csv
+fetch-inventory-id --ids 124651 -o serials.csv
 fetch-model --models VBW24PNLS -o model.csv
 fetch-order-detail --order-ids 17667 -o units.csv
 ```
@@ -137,6 +140,47 @@ fetch-physical-inventory -h              # colorized usage + examples
 fetch-physical-inventory --list-fields   # default columns (numbered table)
 fetch-physical-inventory --list-fields --all-fields   # full export guide
 ```
+
+---
+
+## Reference — `fetch_inventory_id`
+
+Exports serial / inventory rows for one or more `InventoryId` values.
+
+**Default columns:** `_source_query`, `timestamp_utc`, `Order.OrderId`, `Order.DateNeeded`, `Order.OrderDate`, `InventoryId`, `MFGSerialNumber`, `ProductId_FK`, `ModelNumber`, `is_allocated`, `Cost`, `SalespersonCostValue`, `LocationShortName`, `ReceivedDate`, `NonSellable`, `ImgURL`, `MobileImageURL`, `ShortDescription`, `manufacturer.Name`, `location.Name`, `location.Add1`, `location.Zip`, `whse_location.Name`, `purchase_order_item.unit_cost`, `item_tags.value`, and `_error` on failures.
+
+`item_tags.value` is exported as a bracketed list like `[D-DISPLAY, CLEARANCE]` when multiple tags are present.
+
+### Examples
+
+```bash
+# Single inventory ID
+python fetch_inventory_id.py --ids 124651
+
+# Multiple inventory IDs
+python fetch_inventory_id.py --ids 124651,130200 -o serials.csv
+
+# JSON output
+python fetch_inventory_id.py --ids 124651 --output-format json -o serials.json
+
+# Include older stock
+python fetch_inventory_id.py --ids 124651 --include-aged -o serials.csv
+
+# Include all statuses
+python fetch_inventory_id.py --ids 124651 --all-statuses -o serials.csv
+
+# IDs from a CSV file
+python fetch_inventory_id.py -i ids.csv -o serials.csv
+
+# Debug login / CAPTCHA issues
+python fetch_inventory_id.py --ids 124651 --show-browser
+
+# Show available columns
+python fetch_inventory_id.py --list-fields
+python fetch_inventory_id.py --list-fields --all-fields
+```
+
+**Useful flags:** `--include-aged`, `--all-statuses`, `--only-with-obsolete-onhand`, `--all-fields`, `--page-size`, `--show-browser`
 
 ---
 
