@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import json
 import sys
 from dataclasses import dataclass, field
@@ -195,7 +196,10 @@ def load_ids_from_input(
                         ids.append(str(entry[key]).strip())
                         break
     else:
-        rows = list(csv.reader(text.splitlines()))
+        # Use StringIO rather than str.splitlines(): splitlines() treats
+        # stray control characters (e.g. \x1d) as line breaks, which can
+        # shred a field's value across CSV columns if a field contains one.
+        rows = list(csv.reader(io.StringIO(text)))
         if not rows:
             return []
         header = rows[0]
