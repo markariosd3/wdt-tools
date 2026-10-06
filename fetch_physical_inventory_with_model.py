@@ -243,7 +243,7 @@ def emit_joined(
 ) -> int:
     """
     Build the column list using the same rules fetch_physical_inventory
-    uses, then append the four model columns. Write CSV or JSON.
+    uses, then insert the four model columns after InventoryId.
     """
     if all_fields:
         columns = hc.build_all_columns(rows, fpi.PROVENANCE_COLUMNS)
@@ -256,9 +256,17 @@ def emit_joined(
             script_label="inventory",
         )
 
-    for c in MODEL_APPEND_FIELDS:
-        if c not in columns:
-            columns.append(c)
+    # Insert model fields after InventoryId instead of appending at end
+    try:
+        idx = columns.index("InventoryId")
+        for field in reversed(MODEL_APPEND_FIELDS):
+            if field not in columns:
+                columns.insert(idx + 1, field)
+    except ValueError:
+        # InventoryId not in columns, append at end
+        for c in MODEL_APPEND_FIELDS:
+            if c not in columns:
+                columns.append(c)
 
     # Replace single hyphens with " - " and wrap in double quotes to prevent Excel
     # from auto-converting date-like values (e.g., '01-15-02' -> date).
