@@ -260,6 +260,20 @@ def emit_joined(
         if c not in columns:
             columns.append(c)
 
+    # Replace single hyphens with " - " and wrap in double quotes to prevent Excel
+    # from auto-converting date-like values (e.g., '01-15-02' -> date).
+    # '01 - 15 - 02' with quotes will be treated as literal text.
+    location_fields = [
+        "ScannedDetails.LocationName",
+        "ScannedDetails.WHSELocationName",
+        "whse_location.Name",
+    ]
+    for row in rows:
+        for field in location_fields:
+            if field in row and row[field]:
+                replaced = str(row[field]).replace("-", " - ")
+                row[field] = f'"{replaced}"'
+
     return hc.emit_tabular_rows(rows, out_path, fmt, columns)
 
 

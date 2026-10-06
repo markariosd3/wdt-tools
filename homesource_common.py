@@ -272,8 +272,14 @@ def emit_tabular_rows(
     out_path: str | None,
     fmt: str,
     columns: Sequence[str],
+    *,
+    quote_fields: Sequence[str] | None = None,
 ) -> int:
-    """Write rows as CSV or JSON to a file or stdout. Returns count written."""
+    """Write rows as CSV or JSON to a file or stdout. Returns count written.
+
+    quote_fields: field names to always quote in CSV output (prevents Excel
+        from auto-converting date-like values like '01-15-02' to dates).
+    """
     if fmt == "json":
         projected = [{c: r.get(c, "") for c in columns} for r in rows]
         text = json.dumps(projected, indent=2, default=str)
@@ -290,7 +296,13 @@ def emit_tabular_rows(
         fh = sys.stdout
         close_after = False
     try:
-        writer = csv.DictWriter(fh, fieldnames=list(columns), extrasaction="ignore")
+        quote_fields_set = set(quote_fields or [])
+        if quote_fields_set:
+            class ForceQuoteDialect(csv.excel):
+                quoting = csv.QUOTE_NONNUMERIC
+            writer = csv.DictWriter(fh, fieldnames=list(columns), extrasaction="ignore", dialect=ForceQuoteDialect)
+        else:
+            writer = csv.DictWriter(fh, fieldnames=list(columns), extrasaction="ignore")
         writer.writeheader()
         for r in rows:
             writer.writerow(r)
@@ -310,6 +322,7 @@ def emit_curated_rows(
     all_fields: bool = False,
     quiet: bool = False,
     script_label: str = "curated",
+    quote_fields: Sequence[str] | None = None,
 ) -> int:
     """Emit rows using curated or full dynamic columns."""
     columns = (
@@ -323,7 +336,7 @@ def emit_curated_rows(
             script_label=script_label,
         )
     )
-    return emit_tabular_rows(rows, out_path, fmt, columns)
+    return emit_tabular_rows(rows, out_path, fmt, columns, quote_fields=quote_fields)
 
 
 def _resolve_chromedriver_service():
